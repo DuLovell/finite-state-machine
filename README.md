@@ -5,112 +5,112 @@
 ## Пример использования для обычной кнопки (не UnityEngine.UI)
 ### Машина состояний
 ```c#
-    public class ButtonStateMachine : StateMachine
+public class ButtonStateMachine : StateMachine
+{
+    private ButtonAnimator _buttonAnimator = null!;
+
+    private ButtonPushState _pushState = null!;
+    private ButtonUnpushState _unpushState = null!;
+
+    private void Awake()
     {
-        private ButtonAnimator _buttonAnimator = null!;
+        _buttonAnimator = GetComponent<ButtonAnimator>();
 
-        private ButtonPushState _pushState = null!;
-        private ButtonUnpushState _unpushState = null!;
-
-        private void Awake()
-        {
-            _buttonAnimator = GetComponent<ButtonAnimator>();
-
-            ConfigureStates();
+        ConfigureStates();
 			
-            AddTransition(_unpushState, _pushState, InputReader.Instance.OnTouchBegan);
-            AddTransition(_pushState, _unpushState, InputReader.Instance.OnTouchEnded);
-        }
+        AddTransition(_unpushState, _pushState, InputReader.Instance.OnTouchBegan);
+        AddTransition(_pushState, _unpushState, InputReader.Instance.OnTouchEnded);
+    }
 
-        private void Start()
-        {
-            SetState(_unpushState); // Переходим в дефолтное состояние
-        }
+    private void Start()
+    {
+        SetState(_unpushState); // Переходим в дефолтное состояние
+    }
 
-        private void ConfigureStates()
-        {
-            _pushState = new ButtonPushState(_buttonAnimator);
-            _unpushState = new ButtonUnpushState(_buttonAnimator);
-        }
-    } 
+    private void ConfigureStates()
+    {
+        _pushState = new ButtonPushState(_buttonAnimator);
+        _unpushState = new ButtonUnpushState(_buttonAnimator);
+    }
+} 
 ```
 ### Состояния
 ```c#
-    public class ButtonUnpushState : State
+public class ButtonUnpushState : State
+{
+    private readonly ButtonAnimator _buttonAnimator;
+
+    public ButtonUnpushState(ButtonAnimator buttonAnimator)
     {
-        private readonly ButtonAnimator _buttonAnimator;
-
-        public ButtonUnpushState(ButtonAnimator buttonAnimator)
-        {
-            _buttonAnimator = buttonAnimator;
-        }
-        
-        public override void OnEnter()
-        {
-            _buttonAnimator.PlayUnpush();
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override string Name
-        {
-            get { return "Unpush"; }
-        }
+        _buttonAnimator = buttonAnimator;
     }
+        
+    public override void OnEnter()
+    {
+        _buttonAnimator.PlayUnpush();
+    }
+
+    public override void OnExit()
+    {
+    }
+
+    public override string Name
+    {
+        get { return "Unpush"; }
+    }
+}
 ```
 
 ```c#
-    public class ButtonPushState : State
+public class ButtonPushState : State
+{
+    private readonly ButtonAnimator _buttonAnimator;
+
+    public ButtonPushState(ButtonAnimator buttonAnimator)
     {
-        private readonly ButtonAnimator _buttonAnimator;
-
-        public ButtonPushState(ButtonAnimator buttonAnimator)
-        {
-            _buttonAnimator = buttonAnimator;
-        }
-
-        public override void OnEnter()
-        {
-            _buttonAnimator.PlayPush();
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override string Name
-        {
-            get { return "Push"; }
-        }
+        _buttonAnimator = buttonAnimator;
     }
+
+    public override void OnEnter()
+    {
+        _buttonAnimator.PlayPush();
+    }
+
+    public override void OnExit()
+    {
+    }
+
+    public override string Name
+    {
+        get { return "Push"; }
+    }
+}
 ```
 ### Пример использования внешнего события с помощью ```EventObject```
 ```c#
-    public class InputReader : Singleton<InputReader>
+public class InputReader : Singleton<InputReader>
+{
+    public readonly EventObject OnTouchBegan = new();
+    public readonly EventObject OnTouchEnded = new();
+
+    private void Update()
     {
-        public readonly EventObject OnTouchBegan = new();
-        public readonly EventObject OnTouchEnded = new();
+        if (Input.touches.Length == 0) {
+            return;
+        }
 
-        private void Update()
+        TouchPhase touchPhase = Input.GetTouch(0).phase;
+        switch (touchPhase)
         {
-            if (Input.touches.Length == 0) {
-                return;
-            }
-
-            TouchPhase touchPhase = Input.GetTouch(0).phase;
-            switch (touchPhase)
-            {
-                case TouchPhase.Began:
-                    OnTouchBegan.Invoke();
-                    break;
-                case TouchPhase.Canceled or TouchPhase.Ended:
-                    OnTouchEnded.Invoke();
-                    break;
-            }
+            case TouchPhase.Began:
+                OnTouchBegan.Invoke();
+                break;
+            case TouchPhase.Canceled or TouchPhase.Ended:
+                OnTouchEnded.Invoke();
+                break;
         }
     }
+}
 ```
 
 
