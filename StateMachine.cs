@@ -5,19 +5,6 @@ using JetBrains.Annotations;
 using UnityEngine;
 #nullable enable
 
-// Notes
-// 1. What a finite state machine is
-// 2. Examples where you'd use one
-//     AI, Animation, Game State
-// 3. Parts of a State Machine
-//     States & Transitions
-// 4. States - 3 Parts
-//     Tick - Why it's not Update()
-//     OnEnter / OnExit (setup & cleanup)
-// 5. Transitions
-//     Separated from states so they can be re-used
-//     Easy transitions from any state
-
 namespace FSM
 {
    public abstract class StateMachine : MonoBehaviour
@@ -40,20 +27,14 @@ namespace FSM
          if (state == CurrentState) {
             return;
          }
-         
-         foreach (Transition currentTransition in _currentTransitions) {
-            if (currentTransition.TriggerEvent == null) {
-               continue;
-            }
 
+         foreach (Transition currentTransition in _currentTransitions.Where(t => t.TriggerEvent != null)) {
             foreach (Action currentAction in _currentActions) {
-               currentTransition.TriggerEvent.Event -= currentAction;  
+               currentTransition.TriggerEvent!.Event -= currentAction;  
             }
          }
 
-         if (CurrentState != null) {
-            CurrentState.OnExit();
-         }
+         CurrentState?.OnExit();
          CurrentState = state;
 
          _transitions.TryGetValue(CurrentState.GetType(), out _currentTransitions);
@@ -62,13 +43,9 @@ namespace FSM
          CurrentState.OnEnter();
 
          _currentActions.Clear();
-         foreach (Transition currentTransition in _currentTransitions) {
-            if (currentTransition.TriggerEvent == null) {
-               continue;
-            }
-
+         foreach (Transition currentTransition in _currentTransitions.Where(t => t.TriggerEvent != null)) {
             void SetStateAction() => SetState(currentTransition.To);
-            currentTransition.TriggerEvent.Event += SetStateAction;
+            currentTransition.TriggerEvent!.Event += SetStateAction;
             _currentActions.Add(SetStateAction);
          }
       }
