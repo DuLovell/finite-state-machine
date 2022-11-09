@@ -1,4 +1,4 @@
-# Finite State Machine
+# Finite State Machine в Unity
 
 Реализация машины состояний с выделенными transitions и conditions, а также с возможностью менять состояние по внешнему событию.
 
