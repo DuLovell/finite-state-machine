@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using FSM.Attributes;
 using UnityEditor;
 using UnityEngine;
@@ -15,3 +16,4 @@ namespace FSM.Editor
         }
     }
 }
+#endif
