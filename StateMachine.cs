@@ -13,13 +13,13 @@ namespace FSM
       [ReadOnlyInspector] [UsedImplicitly]
       [SerializeField] protected string? _currentStateName;
       
-      private readonly Dictionary<Type, List<Transition>> _transitions = new Dictionary<Type, List<Transition>>();
-      private List<Transition> _currentTransitions = new List<Transition>();
-      private readonly List<Transition> _anyTransitions = new List<Transition>();
+      private readonly Dictionary<Type, List<Transition>> _transitions = new();
+      private List<Transition> _currentTransitions = new();
+      private readonly List<Transition> _anyTransitions = new();
    
-      private static readonly List<Transition> _emptyTransitions = new List<Transition>(0);
+      private static readonly List<Transition> _emptyTransitions = new(0);
       
-      private readonly List<Action> _currentActions = new List<Action>();
+      private readonly List<Action> _currentActions = new();
 
       private State? _currentState;
 
@@ -76,6 +76,12 @@ namespace FSM
       protected void AddAnyTransition(State state, Func<bool> predicate)
       {
          _anyTransitions.Add(new Transition(state, predicate));
+      }
+      
+      protected void AddAnyTransition(State state, EventObject triggerEvent)
+      {
+         triggerEvent.Event += () => SetState(state);
+         _anyTransitions.Add(new Transition(state, triggerEvent));
       }
 
       private void Update()
